@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Global 100% Gratis - Internet Archive</title>
+    <title>Chat Global 100% Gratis</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; display: flex; justify-content: center; align-items: center; height: 100vh; color: #f8fafc; }
@@ -23,7 +23,7 @@
 <body>
 
     <div class="contenedor-chat">
-        <div class="cabecera">🌍 Chat Global Descentralizado</div>
+        <div class="cabecera">Chat Global Descentralizado</div>
         <div id="caja-mensajes" class="caja-mensajes"></div>
         <form id="formulario-envio" class="formulario-envio">
             <input type="text" id="campo-mensaje" placeholder="Escribe un mensaje global..." required autocomplete="off">
@@ -32,21 +32,18 @@
     </div>
 
     <script>
-        // PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyMnaIybbxCT2yi8Gy3EDwSp-XQCfUIy4A4yAFz8UJZp0tJB1jHD4e0-HTtmS9OfPOd/exec";
 
         const formulario = document.getElementById('formulario-envio');
         const campoMensaje = document.getElementById('campo-mensaje');
         const cajaMensajes = document.getElementById('caja-mensajes');
 
-        // Asignar un Nickname anónimo fijo para este navegador
         let miNombre = localStorage.getItem('chat_user_name');
         if (!miNombre) {
             miNombre = 'Anon_' + Math.floor(1000 + Math.random() * 9000);
             localStorage.setItem('chat_user_name', miNombre);
         }
 
-        // Renderizar los mensajes en pantalla
         function actualizarPantalla(mensajes) {
             cajaMensajes.innerHTML = '';
             mensajes.forEach(msg => {
@@ -69,7 +66,6 @@
             cajaMensajes.scrollTop = cajaMensajes.scrollHeight;
         }
 
-        // Consultar la base de datos de Google
         async function descargarMensajes() {
             try {
                 const respuesta = await fetch(GOOGLE_SCRIPT_URL);
@@ -80,7 +76,6 @@
             }
         }
 
-        // Enviar nuevo mensaje a Google
         formulario.addEventListener('submit', async (e) => {
             e.preventDefault();
             const texto = campoMensaje.value.trim();
@@ -89,7 +84,6 @@
             campoMensaje.value = '';
 
             try {
-                // Envío optimizado sin bloquear la interfaz
                 await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors', // Evita problemas de políticas de seguridad cruzada
@@ -103,8 +97,7 @@
             }
         });
 
-        // Actualizar automáticamente cada 4 segundos
-        setInterval(descargarMensajes, 4000);
+        setInterval(descargarMensajes, 1500);
         descargarMensajes();
     </script>
 </body>
