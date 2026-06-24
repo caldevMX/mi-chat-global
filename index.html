@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Global 100% Gratis - Internet Archive</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; display: flex; justify-content: center; align-items: center; height: 100vh; color: #f8fafc; }
+        .contenedor-chat { width: 100%; max-width: 450px; height: 85vh; background-color: #1e293b; display: flex; flex-direction: column; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow: hidden; }
+        .cabecera { background-color: #334155; padding: 18px; text-align: center; font-size: 16px; font-weight: bold; border-bottom: 1px solid #475569; }
+        .caja-mensajes { flex: 1; padding: 20px; overflow-y: auto; background-color: #0f172a; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px 14px; border-radius: 12px; max-width: 80%; word-wrap: break-word; font-size: 14px; line-height: 1.4; }
+        .msg .nom { font-weight: 800; font-size: 11px; display: block; margin-bottom: 2px; color: #38bdf8; }
+        .msg.mio { background-color: #0284c7; align-self: flex-end; color: white; border-bottom-right-radius: 2px; }
+        .msg.otros { background-color: #334155; align-self: flex-start; color: white; border-bottom-left-radius: 2px; }
+        .formulario-envio { display: flex; padding: 12px; background-color: #1e293b; gap: 8px; }
+        .formulario-envio input { flex: 1; padding: 12px 16px; border: none; background-color: #334155; color: white; border-radius: 25px; outline: none; font-size: 14px; }
+        .formulario-envio button { padding: 0 22px; background-color: #0ea5e9; color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
+        .formulario-envio button:hover { background-color: #0284c7; }
+    </style>
+</head>
+<body>
+
+    <div class="contenedor-chat">
+        <div class="cabecera">🌍 Chat Global Descentralizado</div>
+        <div id="caja-mensajes" class="caja-mensajes"></div>
+        <form id="formulario-envio" class="formulario-envio">
+            <input type="text" id="campo-mensaje" placeholder="Escribe un mensaje global..." required autocomplete="off">
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+
+    <script>
+        // PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyMnaIybbxCT2yi8Gy3EDwSp-XQCfUIy4A4yAFz8UJZp0tJB1jHD4e0-HTtmS9OfPOd/exec";
+
+        const formulario = document.getElementById('formulario-envio');
+        const campoMensaje = document.getElementById('campo-mensaje');
+        const cajaMensajes = document.getElementById('caja-mensajes');
+
+        // Asignar un Nickname anónimo fijo para este navegador
+        let miNombre = localStorage.getItem('chat_user_name');
+        if (!miNombre) {
+            miNombre = 'Anon_' + Math.floor(1000 + Math.random() * 9000);
+            localStorage.setItem('chat_user_name', miNombre);
+        }
+
+        // Renderizar los mensajes en pantalla
+        function actualizarPantalla(mensajes) {
+            cajaMensajes.innerHTML = '';
+            mensajes.forEach(msg => {
+                const div = document.createElement('div');
+                div.classList.add('msg');
+                
+                if (msg.usuario === miNombre) {
+                    div.classList.add('mio');
+                } else {
+                    div.classList.add('otros');
+                    const span = document.createElement('span');
+                    span.classList.add('nom');
+                    span.textContent = msg.usuario;
+                    div.appendChild(span);
+                }
+
+                div.appendChild(document.createTextNode(msg.mensaje));
+                cajaMensajes.appendChild(div);
+            });
+            cajaMensajes.scrollTop = cajaMensajes.scrollHeight;
+        }
+
+        // Consultar la base de datos de Google
+        async function descargarMensajes() {
+            try {
+                const respuesta = await fetch(GOOGLE_SCRIPT_URL);
+                const datos = await respuesta.json();
+                actualizarPantalla(datos);
+            } catch (e) {
+                console.error("Error cargando mensajes", e);
+            }
+        }
+
+        // Enviar nuevo mensaje a Google
+        formulario.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const texto = campoMensaje.value.trim();
+            if (!texto) return;
+
+            campoMensaje.value = '';
+
+            try {
+                // Envío optimizado sin bloquear la interfaz
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Evita problemas de políticas de seguridad cruzada
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario: miNombre, mensaje: texto })
+                });
+                // Actualización inmediata local simulada mientras sube
+                descargarMensajes();
+            } catch (e) {
+                console.error("Error enviando", e);
+            }
+        });
+
+        // Actualizar automáticamente cada 4 segundos
+        setInterval(descargarMensajes, 4000);
+        descargarMensajes();
+    </script>
+</body>
+</html>
